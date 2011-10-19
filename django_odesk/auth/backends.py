@@ -190,8 +190,24 @@ class TeamAuthBackend(ModelBackend):
         from django.db import connection
 
         def clear_groups(user):
+            # Gets the user groups
+            user_groups = [group for group in user.groups.all()]
+            
+            # Gets the groups to delete
+            group_list = []
+            for group in user_groups:
+                if group.name.endswith('@odesk.com'):
+                    group_list.append(group.id)
+            
+            # Prepares the sql "IN" string
+            id_list = ''
+            if group_list:
+                id_list = ','.join('%d' % v for v in group_list)
+                
             cursor = connection.cursor()
-            cursor.execute("DELETE FROM auth_user_groups WHERE user_id=%s", (user.id,))
+            if id_list:
+                cursor.execute("DELETE FROM auth_user_groups WHERE user_id=%s AND group_id IN(%s)", (user.id, id_list))
+    
 
         def bulk_groups_insert(user, groups_query):
             group_ids = filter(lambda gid: gid is not None,
