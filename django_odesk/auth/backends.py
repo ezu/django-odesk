@@ -194,12 +194,12 @@ class TeamAuthBackend(ModelBackend):
             
             # Deletes the usergroups with '@odesk.com' suffix
             cursor.execute("""
-            DELETE FROM auth_user_groups 
-            WHERE user_id = %s AND group_id IN(
-                        SELECT id 
-                        FROM auth_group 
-                        WHERE name LIKE '%@odesk.com')
-            """, (user.id,))
+                DELETE FROM auth_user_groups 
+                WHERE user_id=%s AND group_id IN (
+                    SELECT id 
+                    FROM auth_group 
+                    WHERE name LIKE '%%odesk.com')
+                """, (user.id,))
 
         def bulk_groups_insert(user, groups_query):
             group_ids = filter(lambda gid: gid is not None,
